@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8">
+  <title>Ամսվա վաճառքներ</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input { margin-right: 10px; }
+    button { margin-left: 10px; }
+    .section { margin-top: 20px; }
+    .day-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Ամսվա վաճառքներ</h1>
+
+  <!-- Վաճառք ավելացնելու ձև -->
+  <div class="section">
+    <h2>Ավելացնել վաճառք</h2>
+    <input type="number" id="saleInput" placeholder="Գինը դրամով">
+    <button onclick="addSale()">Ավելացնել</button>
+  </div>
+
+  <!-- Օրվա վաճառքներ -->
+  <div class="section">
+    <h2>Այսօրվա վաճառքներ</h2>
+    <ul id="salesList"></ul>
+    <p><strong>Օրվա ընդհանուր՝ <span id="dayTotal">0</span> դրամ</strong></p>
+  </div>
+
+  <!-- Ամսվա բոլոր օրերը -->
+  <div class="section">
+    <h2>Ամսվա օրեր</h2>
+    <div id="monthDays"></div>
+    <p><strong>Ամսվա ընդհանուր՝ <span id="monthTotal">0</span> դրամ</strong></p>
+  </div>
+
+  <script>
+    const todayKey = new Date().toISOString().split("T")[0]; // օրինակ՝ "2026-07-16"
+    let allSales = JSON.parse(localStorage.getItem("allSales")) || {};
+    if (!allSales[todayKey]) allSales[todayKey] = [];
+
+    function render() {
+      // Օրվա վաճառքներ
+      const salesList = document.getElementById("salesList");
+      salesList.innerHTML = "";
+      let dayTotal = 0;
+      allSales[todayKey].forEach((price, i) => {
+        const li = document.createElement("li");
+        li.textContent = `Վաճառք ${i+1} - ${price} դրամ`;
+        salesList.appendChild(li);
+        dayTotal += price;
+      });
+      document.getElementById("dayTotal").textContent = dayTotal;
+
+      // Ամսվա օրերի ցուցակ
+      const monthDays = document.getElementById("monthDays");
+      monthDays.innerHTML = "";
+      let monthTotal = 0;
+      for (let day in allSales) {
+        let daySum = allSales[day].reduce((a,b)=>a+b,0);
+        monthTotal += daySum;
+        const div = document.createElement("div");
+        div.className = "day-block";
+        div.innerHTML = `<strong>${day}</strong> — ${daySum} դրամ`;
+        monthDays.appendChild(div);
+      }
+      document.getElementById("monthTotal").textContent = monthTotal;
+    }
+
+    function addSale() {
+      const price = parseInt(document.getElementById("saleInput").value);
+      if (!isNaN(price) && price > 0) {
+        allSales[todayKey].push(price);
+        localStorage.setItem("allSales", JSON.stringify(allSales));
+        render();
+        document.getElementById("saleInput").value = "";
+      } else {
+        alert("Մուտքագրիր ճիշտ գին։");
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
