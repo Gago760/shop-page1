@@ -3,12 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>Ամսվա վաճառքներ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input { margin-right: 10px; }
-    button { margin-left: 10px; }
+    body { font-family: Arial, sans-serif; margin: 10px; }
+    h1, h2 { text-align: center; }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      font-size: 18px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
     .section { margin-top: 20px; }
-    .day-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .day-block {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #f9f9f9;
+    }
+    ul { padding-left: 20px; }
   </style>
 </head>
 <body>
@@ -26,6 +41,7 @@
     <h2>Այսօրվա վաճառքներ</h2>
     <ul id="salesList"></ul>
     <p><strong>Օրվա ընդհանուր՝ <span id="dayTotal">0</span> դրամ</strong></p>
+    <button onclick="clearDay()">🗑️ Մաքրել օրվա վաճառքները</button>
   </div>
 
   <!-- Ամսվա բոլոր օրերը -->
@@ -33,10 +49,11 @@
     <h2>Ամսվա օրեր</h2>
     <div id="monthDays"></div>
     <p><strong>Ամսվա ընդհանուր՝ <span id="monthTotal">0</span> դրամ</strong></p>
+    <button onclick="clearMonth()">🗑️ Մաքրել ամբողջ ամսվա տվյալները</button>
   </div>
 
   <script>
-    const todayKey = new Date().toISOString().split("T")[0]; // օրինակ՝ "2026-07-16"
+    const todayKey = new Date().toISOString().split("T")[0]; // օրինակ՝ "2026-07-17"
     let allSales = JSON.parse(localStorage.getItem("allSales")) || {};
     if (!allSales[todayKey]) allSales[todayKey] = [];
 
@@ -77,6 +94,22 @@
         document.getElementById("saleInput").value = "";
       } else {
         alert("Մուտքագրիր ճիշտ գին։");
+      }
+    }
+
+    function clearDay() {
+      if (confirm("Վստա՞հ ես, որ ուզում ես մաքրել այսօրվա վաճառքները։")) {
+        allSales[todayKey] = [];
+        localStorage.setItem("allSales", JSON.stringify(allSales));
+        render();
+      }
+    }
+
+    function clearMonth() {
+      if (confirm("Վստա՞հ ես, որ ուզում ես մաքրել ամբողջ ամսվա տվյալները։")) {
+        allSales = {};
+        localStorage.setItem("allSales", JSON.stringify(allSales));
+        render();
       }
     }
 
