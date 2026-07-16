@@ -2,7 +2,7 @@
 <html lang="hy">
 <head>
   <meta charset="UTF-8">
-  <title>Ամսվա վաճառքներ</title>
+  <title>Ամսվա վաճառքներ և պարտքեր</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: Arial, sans-serif; margin: 10px; }
@@ -27,7 +27,7 @@
   </style>
 </head>
 <body>
-  <h1>Ամսվա վաճառքներ</h1>
+  <h1>Ամսվա վաճառքներ և պարտքեր</h1>
 
   <!-- Վաճառք ավելացնելու ձև -->
   <div class="section">
@@ -52,10 +52,23 @@
     <button onclick="clearMonth()">🗑️ Մաքրել ամբողջ ամսվա տվյալները</button>
   </div>
 
+  <!-- Պարտքերի բաժին -->
+  <div class="section">
+    <h2>Պարտքերի ցուցակ</h2>
+    <input type="text" id="debtorName" placeholder="Պարտք վերցնողի անուն">
+    <input type="number" id="debtAmount" placeholder="Գումարը դրամով">
+    <button onclick="addDebt()">Ավելացնել պարտք</button>
+    <ul id="debtsList"></ul>
+    <p><strong>Ընդհանուր պարտք՝ <span id="totalDebt">0</span> դրամ</strong></p>
+    <button onclick="clearDebts()">🗑️ Մաքրել բոլոր պարտքերը</button>
+  </div>
+
   <script>
-    const todayKey = new Date().toISOString().split("T")[0]; // օրինակ՝ "2026-07-17"
+    const todayKey = new Date().toISOString().split("T")[0];
     let allSales = JSON.parse(localStorage.getItem("allSales")) || {};
     if (!allSales[todayKey]) allSales[todayKey] = [];
+
+    let debts = JSON.parse(localStorage.getItem("debts")) || [];
 
     function render() {
       // Օրվա վաճառքներ
@@ -83,6 +96,26 @@
         monthDays.appendChild(div);
       }
       document.getElementById("monthTotal").textContent = monthTotal;
+
+      // Պարտքերի ցուցակ
+      const debtsList = document.getElementById("debtsList");
+      debtsList.innerHTML = "";
+      let totalDebt = 0;
+      debts.forEach((debt, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${debt.name} — ${debt.amount} դրամ`;
+        const btn = document.createElement("button");
+        btn.textContent = "Ջնջել";
+        btn.onclick = () => {
+          debts.splice(i,1);
+          localStorage.setItem("debts", JSON.stringify(debts));
+          render();
+        };
+        li.appendChild(btn);
+        debtsList.appendChild(li);
+        totalDebt += debt.amount;
+      });
+      document.getElementById("totalDebt").textContent = totalDebt;
     }
 
     function addSale() {
@@ -109,6 +142,28 @@
       if (confirm("Վստա՞հ ես, որ ուզում ես մաքրել ամբողջ ամսվա տվյալները։")) {
         allSales = {};
         localStorage.setItem("allSales", JSON.stringify(allSales));
+        render();
+      }
+    }
+
+    function addDebt() {
+      const name = document.getElementById("debtorName").value.trim();
+      const amount = parseInt(document.getElementById("debtAmount").value);
+      if (name && !isNaN(amount) && amount > 0) {
+        debts.push({name, amount});
+        localStorage.setItem("debts", JSON.stringify(debts));
+        render();
+        document.getElementById("debtorName").value = "";
+        document.getElementById("debtAmount").value = "";
+      } else {
+        alert("Մուտքագրիր ճիշտ անուն և գումար։");
+      }
+    }
+
+    function clearDebts() {
+      if (confirm("Վստա՞հ ես, որ ուզում ես մաքրել բոլոր պարտքերը։")) {
+        debts = [];
+        localStorage.setItem("debts", JSON.stringify(debts));
         render();
       }
     }
